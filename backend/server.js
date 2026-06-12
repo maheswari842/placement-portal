@@ -2,6 +2,19 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+// Auto create admin on first run
+const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+
+async function createAdmin() {
+  const existing = await User.findOne({ email: 'maheswari@admin.com' });
+  if (!existing) {
+    const hash = await bcrypt.hash('admin123', 12);
+    await User.create({ name: 'Maheswari Admin', email: 'maheswari@admin.com', password: hash, role: 'admin', totalPoints: 9999 });
+    console.log('Admin created!');
+  }
+}
+mongoose.connection.once('open', createAdmin);
 
 dotenv.config();
 
