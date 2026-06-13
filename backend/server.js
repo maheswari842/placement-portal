@@ -49,4 +49,26 @@ mongoose.connect(process.env.MONGO_URI)
     process.exit(1);
   });
 
+  const User = require('./models/User');
+const bcrypt = require('bcryptjs');
+
+async function createAdmin() {
+  try {
+    const existing = await User.findOne({ email: 'maheswari@admin.com' });
+    if (!existing) {
+      const hash = await bcrypt.hash('admin123', 12);
+      await User.create({ 
+        name: 'Maheswari Admin', 
+        email: 'maheswari@admin.com', 
+        password: hash, 
+        role: 'admin', 
+        totalPoints: 9999 
+      });
+      console.log('Admin created!');
+    }
+  } catch(e) {}
+}
+mongoose.connection.once('open', createAdmin);
+
+
 module.exports = app;
