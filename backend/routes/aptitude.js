@@ -185,4 +185,54 @@ router.post('/check-answer/:questionId', auth, async (req, res) => {
   }
 });
 
+// AI: Generate aptitude questions
+router.post('/generate-ai', adminAuth, async (req, res) => {
+  try {
+    const { category = 'quantitative', difficulty = 'medium', count = 5 } = req.body;
+
+    const prompt = `Generate ${count} unique multiple-choice aptitude questions for placement exam preparation.
+Category: ${category}
+Difficulty: ${difficulty}
+
+Return ONLY a valid JSON array (no markdown, no explanation), where each item has this exact structure:
+{
+  "question": "question text",
+  "options": ["option A", "option B", "option C", "option D"],
+  "correctAnswer": 0,
+  "explanation": "brief explanation of the correct answer"
+}
+correctAnswer is the index (0-3) of the correct option in the options array.`;
+
+    const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+
+    const aiData = await aiRes.json();
+    if (!aiData.candidates) return res.status(500).json({ message: 'AI error', error: JSON.stringify(aiData) });
+
+    let text = aiData.candidates[0].content.parts[0].text;
+    text = text.replace(/```json|```/g, '').trim();
+    const questions = JSON.parse(text);
+
+    const docs = questions.map(q => ({
+      question: q.question,
+      options: q.options,
+      correctAnswer: q.correctAnswer,
+      explanation: q.explanation || '',
+      category,
+      difficulty,
+      company: 'General',
+      points: difficulty === 'hard' ? 20 : difficulty === 'medium' ? 10 : 5,
+      createdBy: req.user._id
+    }));
+
+    const created = await AptitudeQuestion.insertMany(docs);
+    res.json({ count: created.length, questions: created });
+  } catch (error) {
+    res.status(500).json({ message: 'AI generation failed', error: error.message });
+  }
+});
+
 module.exports = router;
