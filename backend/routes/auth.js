@@ -99,6 +99,23 @@ router.put('/change-password', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
+
+  // Make admin route
+router.post('/make-admin', async (req, res) => {
+  try {
+    const { email, secret } = req.body;
+    if (secret !== 'placepro2024') return res.status(403).json({ message: 'Wrong secret' });
+    const user = await User.findOneAndUpdate(
+      { email },
+      { $set: { role: 'admin' } },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'Admin created!', user });
+  } catch (e) {
+    res.status(500).json({ message: e.message });
+  }
+});
 });
 
 module.exports = router;
