@@ -99,8 +99,9 @@ router.put('/change-password', auth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
+});
 
-  // Make admin route
+// Make admin route
 router.post('/make-admin', async (req, res) => {
   try {
     const { email, secret } = req.body;
@@ -116,6 +117,8 @@ router.post('/make-admin', async (req, res) => {
     res.status(500).json({ message: e.message });
   }
 });
-});
 
 module.exports = router;
+
+  
+
