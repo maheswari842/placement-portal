@@ -112,6 +112,7 @@ router.post('/submit-test/:testId', auth, async (req, res) => {
 router.get('/history', auth, async (req, res) => {
   try {
     const tests = await AptitudeTest.find({ user: req.user._id, status: 'completed' })
+      .populate('questions.question')
       .sort({ completedAt: -1 })
       .limit(20);
     res.json(tests);
@@ -119,7 +120,6 @@ router.get('/history', auth, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
-
 // Admin: Add question
 router.post('/questions', adminAuth, async (req, res) => {
   try {
