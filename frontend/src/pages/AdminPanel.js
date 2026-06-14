@@ -208,6 +208,30 @@ export default function AdminPanel() {
         {activeTab === 'add-aptitude' && (
           <div className="card fade-in">
             <div className="card-header"><span className="card-title">🧠 Add Aptitude Question</span></div>
+            {/* AI Generate Button */}
+<div style={{ marginBottom: 16 }}>
+  <button type="button" className="btn btn-primary" disabled={loading}
+    onClick={async () => {
+      setLoading(true);
+      try {
+        const res = await axios.post('/api/aptitude/generate-ai', {
+          category: aptForm.category,
+          difficulty: aptForm.difficulty,
+          count: 5
+        });
+        toast.success(`✅ ${res.data.count} AI questions generated!`);
+        fetchStats();
+      } catch (e) {
+        toast.error('AI generation failed!');
+      }
+      setLoading(false);
+    }}>
+    {loading ? '⏳ Generating...' : '🤖 Generate AI Questions'}
+  </button>
+  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+    Category & Difficulty select பண்ணி AI generate பண்ணலாம்!
+  </p>
+</div>
             <form onSubmit={submitAptitude}>
 
               <div className="input-group">
