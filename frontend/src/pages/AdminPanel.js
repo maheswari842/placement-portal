@@ -79,16 +79,6 @@ export default function AdminPanel() {
   }
 };
 
-  const deleteStudent = async (id, name) => {
-    if (!window.confirm(`Delete "${name}"?`)) return;
-    try {
-      await axios.delete(`/api/users/${id}`);
-      toast.success('🗑️ Student deleted!');
-      fetchStudents();
-    } catch (e) {
-      toast.error('Failed to delete');
-    }
-  };
 
   const submitAptitude = async (e) => {
     e.preventDefault();
