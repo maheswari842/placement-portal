@@ -68,6 +68,28 @@ export default function AdminPanel() {
     } catch (e) {}
   };
 
+  const deleteStudent = async (id, name) => {
+  if (!window.confirm(`Delete "${name}"?`)) return;
+  try {
+    await axios.delete(`/api/users/${id}`);
+    toast.success('🗑️ Student deleted!');
+    fetchStudents();
+  } catch (e) {
+    toast.error('Failed to delete');
+  }
+};
+
+  const deleteStudent = async (id, name) => {
+    if (!window.confirm(`Delete "${name}"?`)) return;
+    try {
+      await axios.delete(`/api/users/${id}`);
+      toast.success('🗑️ Student deleted!');
+      fetchStudents();
+    } catch (e) {
+      toast.error('Failed to delete');
+    }
+  };
+
   const submitAptitude = async (e) => {
     e.preventDefault();
     if (aptForm.options.some(o => !o.trim())) return toast.error('All 4 options required!');
@@ -399,6 +421,7 @@ export default function AdminPanel() {
                         <th>Solved</th>
                         <th>Streak</th>
                         <th>Role</th>
+                        <th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -418,6 +441,11 @@ export default function AdminPanel() {
                           <td><span style={{ fontFamily: 'var(--font-mono)', color: 'var(--accent-green)' }}>{s.codingStats?.totalSolved || 0}</span></td>
                           <td>{s.streak > 0 ? <span style={{ color: 'var(--accent-yellow)' }}>🔥 {s.streak}</span> : '—'}</td>
                           <td><span className={`chip ${s.role === 'admin' ? 'chip-hard' : 'chip-info'}`}>{s.role}</span></td>
+                          <td>
+  {s.role !== 'admin' && (
+    <button className="btn btn-secondary btn-sm" onClick={() => deleteStudent(s._id, s.name)}>🗑️ Delete</button>
+  )}
+</td>
                         </tr>
                       ))}
                     </tbody>
