@@ -223,9 +223,14 @@ correctAnswer is the index (0-3) of the correct option.`;
 
     res.json({ questions });
 
-  } catch (err) {
-    console.error('Groq Error:', err);
-    res.status(500).json({ message: 'AI generation failed' });
+ } catch (err) {
+    console.error('Groq Error Message:', err.message);
+    console.error('Groq API Key exists:', !!process.env.GROQ_API_KEY);
+    res.status(500).json({ 
+      message: err.message,
+      keyExists:!!process.env.GROQ_API_KEY
+    });
   }
-});
+
 module.exports = router;
+
