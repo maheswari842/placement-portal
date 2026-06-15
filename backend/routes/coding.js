@@ -179,4 +179,59 @@ router.get('/daily-challenge', auth, async (req, res) => {
   }
 });
 
+// AI: Generate coding questions
+router.post('/generate-ai', adminAuth, async (req, res) => {
+  try {
+    const { category = 'arrays', difficulty = 'easy', count = 5 } = req.body;
+
+    const prompt = `Generate ${count} unique coding problems for placement exam preparation.
+Category: ${category}
+Difficulty: ${difficulty}
+
+Return ONLY a valid JSON array, where each item has this exact structure:
+{
+  "title": "Problem Title",
+  "description": "Detailed problem description",
+  "difficulty": "${difficulty}",
+  "category": "${category}",
+  "points": 20,
+  "constraints": "1 <= n <= 10^5",
+  "examples": [{"input": "nums = [1,2]", "output": "3", "explanation": "1+2=3"}],
+  "hints": ["Think about loops"],
+  "company": ["General"]
+}`;
+
+    const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
+      })
+    });
+
+    const data = await aiRes.json();
+
+    if (!data.choices || data.choices.length === 0) {
+      return res.status(500).json({ message: 'Groq API error', details: data });
+    }
+
+    const text = data.choices[0].message.content;
+    const clean = text.replace(/```json|```/g, '').trim();
+    const questions = JSON.parse(clean);
+
+    const saved = await CodingQuestion.insertMany(
+      questions.map(q => ({ ...q, createdBy: req.user._id }))
+    );
+
+    res.json({ count: saved.length, questions: saved });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;
