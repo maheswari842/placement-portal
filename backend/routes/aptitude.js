@@ -201,38 +201,31 @@ Return ONLY a valid JSON array (no markdown, no explanation), where each item ha
   "correctAnswer": 0,
   "explanation": "brief explanation of the correct answer"
 }
-correctAnswer is the index (0-3) of the correct option in the options array.`;
+correctAnswer is the index (0-3) of the correct option.`;
 
-     const aiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const aiRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama3-8b-8192',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
+      })
     });
 
-    const aiData = await aiRes.json();
-    if (!aiData.candidates) return res.status(500).json({ message: 'AI error', error: JSON.stringify(aiData) });
+    const data = await aiRes.json();
+    const text = data.choices[0].message.content;
+    const clean = text.replace(/```json|```/g, '').trim();
+    const questions = JSON.parse(clean);
 
-    let text = aiData.candidates[0].content.parts[0].text;
-    text = text.replace(/```json|```/g, '').trim();
-    const questions = JSON.parse(text);
+    res.json({ questions });
 
-    const docs = questions.map(q => ({
-      question: q.question,
-      options: q.options,
-      correctAnswer: q.correctAnswer,
-      explanation: q.explanation || '',
-      category,
-      difficulty,
-      company: 'General',
-      points: difficulty === 'hard' ? 20 : difficulty === 'medium' ? 10 : 5,
-      createdBy: req.user._id
-    }));
-
-    const created = await AptitudeQuestion.insertMany(docs);
-    res.json({ count: created.length, questions: created });
-  } catch (error) {
-    res.status(500).json({ message: 'AI generation failed', error: error.message });
+  } catch (err) {
+    console.error('Groq Error:', err);
+    res.status(500).json({ message: 'AI generation failed' });
   }
 });
-
 module.exports = router;
