@@ -231,6 +231,6 @@ correctAnswer is the index (0-3) of the correct option.`;
       keyExists:!!process.env.GROQ_API_KEY
     });
   }
+});
 
 module.exports = router;
-
