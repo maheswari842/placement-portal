@@ -209,7 +209,7 @@ export default function AdminPanel() {
           difficulty: aptForm.difficulty,
           count: 5
         });
-        toast.success(`✅ ${res.data.count} AI questions generated!`);
+        toast.success(`✅ ${res.data.questions.length} AI questions generated!`);
         fetchStats();
       } catch (e) {
         toast.error('AI generation failed!');
