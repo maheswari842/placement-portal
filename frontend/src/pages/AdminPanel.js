@@ -201,7 +201,7 @@ export default function AdminPanel() {
                     const res = await axios.post('/api/aptitude/generate-ai', {
                       category: aptForm.category,
                       difficulty: aptForm.difficulty,
-                      count: 5
+                      count: 15
                     });
                     toast.success(`✅ ${res.data.questions.length} AI questions generated!`);
                     fetchStats();
@@ -210,7 +210,7 @@ export default function AdminPanel() {
                   }
                   setLoading(false);
                 }}>
-                {loading ? '⏳ Generating...' : '🤖 Generate AI Questions'}
+                {loading ? '⏳ Generating...' : '🤖 AI Generate AI 15 Questions'}
               </button>
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                 Category & Difficulty select பண்ணி AI generate பண்ணலாம்!
