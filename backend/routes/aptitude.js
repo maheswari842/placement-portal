@@ -50,7 +50,6 @@ router.post('/start-test', auth, async (req, res) => {
     });
     await test.save();
 
-    // Return questions without correct answers
     const safeQuestions = questions.map(q => {
       const { correctAnswer, explanation, ...safe } = q;
       return safe;
@@ -65,7 +64,7 @@ router.post('/start-test', auth, async (req, res) => {
 // Submit test
 router.post('/submit-test/:testId', auth, async (req, res) => {
   try {
-    const { answers, timeTaken } = req.body; // answers: [{questionId, selectedAnswer}]
+    const { answers, timeTaken } = req.body;
     const test = await AptitudeTest.findById(req.params.testId).populate('questions.question');
 
     if (!test) return res.status(404).json({ message: 'Test not found' });
@@ -91,7 +90,6 @@ router.post('/submit-test/:testId', auth, async (req, res) => {
     test.completedAt = new Date();
     await test.save();
 
-    // Update user stats
     await User.findByIdAndUpdate(req.user._id, {
       $inc: {
         'aptitudeStats.totalAttempted': test.totalQuestions,
@@ -100,7 +98,6 @@ router.post('/submit-test/:testId', auth, async (req, res) => {
       }
     });
 
-    // Return with correct answers for review
     const result = await AptitudeTest.findById(test._id).populate('questions.question');
     res.json(result);
   } catch (error) {
@@ -120,6 +117,7 @@ router.get('/history', auth, async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
+
 // Admin: Add question
 router.post('/questions', adminAuth, async (req, res) => {
   try {
@@ -217,18 +215,28 @@ correctAnswer is the index (0-3) of the correct option.`;
     });
 
     const data = await aiRes.json();
+
+    // ✅ Fix: Check if Groq returned valid response
+    if (!data.choices || data.choices.length === 0) {
+      console.error('Groq Response:', JSON.stringify(data));
+      return res.status(500).json({
+        message: data.error?.message || 'Groq API error',
+        fullResponse: data
+      });
+    }
+
     const text = data.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     const questions = JSON.parse(clean);
 
     res.json({ questions });
 
- } catch (err) {
+  } catch (err) {
     console.error('Groq Error Message:', err.message);
     console.error('Groq API Key exists:', !!process.env.GROQ_API_KEY);
-    res.status(500).json({ 
+    res.status(500).json({
       message: err.message,
-      keyExists:!!process.env.GROQ_API_KEY
+      keyExists: !!process.env.GROQ_API_KEY
     });
   }
 });
