@@ -16,14 +16,12 @@ export default function AdminPanel() {
   const [stats, setStats] = useState({ users: 0, aptitude: 0, coding: 0 });
   const [loading, setLoading] = useState(false);
 
-  // Aptitude form
   const [aptForm, setAptForm] = useState({
     question: '', options: ['', '', '', ''], correctAnswer: 0,
     explanation: '', category: 'quantitative', difficulty: 'medium',
     company: 'General', points: 10
   });
 
-  // Coding form
   const [codeForm, setCodeForm] = useState({
     title: '', description: '', difficulty: 'easy', category: 'arrays',
     company: [], points: 20, constraints: '',
@@ -69,16 +67,15 @@ export default function AdminPanel() {
   };
 
   const deleteStudent = async (id, name) => {
-  if (!window.confirm(`Delete "${name}"?`)) return;
-  try {
-    await axios.delete(`/api/users/${id}`);
-    toast.success('🗑️ Student deleted!');
-    fetchStudents();
-  } catch (e) {
-    toast.error('Failed to delete');
-  }
-};
-
+    if (!window.confirm(`Delete "${name}"?`)) return;
+    try {
+      await axios.delete(`/api/users/${id}`);
+      toast.success('🗑️ Student deleted!');
+      fetchStudents();
+    } catch (e) {
+      toast.error('Failed to delete');
+    }
+  };
 
   const submitAptitude = async (e) => {
     e.preventDefault();
@@ -145,7 +142,6 @@ export default function AdminPanel() {
       </div>
 
       <div className="page-body">
-        {/* Tabs */}
         <div style={{ display: 'flex', gap: 8, marginBottom: 24, flexWrap: 'wrap' }}>
           {tabs.map(t => (
             <button key={t.id} onClick={() => setActiveTab(t.id)}
@@ -172,7 +168,6 @@ export default function AdminPanel() {
                 </div>
               ))}
             </div>
-
             <div className="card">
               <div className="card-header"><span className="card-title">🚀 Quick Actions</span></div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
@@ -198,38 +193,35 @@ export default function AdminPanel() {
         {activeTab === 'add-aptitude' && (
           <div className="card fade-in">
             <div className="card-header"><span className="card-title">🧠 Add Aptitude Question</span></div>
-            {/* AI Generate Button */}
-<div style={{ marginBottom: 16 }}>
-  <button type="button" className="btn btn-primary" disabled={loading}
-    onClick={async () => {
-      setLoading(true);
-      try {
-        const res = await axios.post('/api/aptitude/generate-ai', {
-          category: aptForm.category,
-          difficulty: aptForm.difficulty,
-          count: 5
-        });
-        toast.success(`✅ ${res.data.questions.length} AI questions generated!`);
-        fetchStats();
-      } catch (e) {
-        toast.error('AI generation failed!');
-      }
-      setLoading(false);
-    }}>
-    {loading ? '⏳ Generating...' : '🤖 Generate AI Questions'}
-  </button>
-  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-    Category & Difficulty select பண்ணி AI generate பண்ணலாம்!
-  </p>
-</div>
+            <div style={{ marginBottom: 16 }}>
+              <button type="button" className="btn btn-primary" disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await axios.post('/api/aptitude/generate-ai', {
+                      category: aptForm.category,
+                      difficulty: aptForm.difficulty,
+                      count: 5
+                    });
+                    toast.success(`✅ ${res.data.questions.length} AI questions generated!`);
+                    fetchStats();
+                  } catch (e) {
+                    toast.error('AI generation failed!');
+                  }
+                  setLoading(false);
+                }}>
+                {loading ? '⏳ Generating...' : '🤖 Generate AI Questions'}
+              </button>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                Category & Difficulty select பண்ணி AI generate பண்ணலாம்!
+              </p>
+            </div>
             <form onSubmit={submitAptitude}>
-
               <div className="input-group">
                 <label className="input-label">Question *</label>
                 <textarea className="input" rows={3} placeholder="Type the question here..." value={aptForm.question}
                   onChange={e => setAptForm({ ...aptForm, question: e.target.value })} required style={{ resize: 'vertical' }} />
               </div>
-
               <div style={{ marginBottom: 16 }}>
                 <label className="input-label">Answer Options * (Select correct answer)</label>
                 {aptForm.options.map((opt, i) => (
@@ -247,7 +239,6 @@ export default function AdminPanel() {
                 ))}
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>🔘 Radio button select pannunga = correct answer</p>
               </div>
-
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label">Category *</label>
@@ -272,15 +263,12 @@ export default function AdminPanel() {
                   <input type="number" className="input" value={aptForm.points} onChange={e => setAptForm({ ...aptForm, points: parseInt(e.target.value) })} min={5} max={50} />
                 </div>
               </div>
-
               <div style={{ height: 12 }} />
               <div className="input-group">
                 <label className="input-label">Explanation (Optional)</label>
                 <textarea className="input" rows={2} placeholder="Explain why the correct answer is right..."
                   value={aptForm.explanation} onChange={e => setAptForm({ ...aptForm, explanation: e.target.value })} style={{ resize: 'vertical' }} />
               </div>
-
-              {/* Preview */}
               {aptForm.question && (
                 <div style={{ marginBottom: 16, padding: 16, background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>📋 Preview</div>
@@ -292,7 +280,6 @@ export default function AdminPanel() {
                   ))}
                 </div>
               )}
-
               <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
                 {loading ? '⏳ Adding...' : '➕ Add Question'}
               </button>
@@ -304,8 +291,33 @@ export default function AdminPanel() {
         {activeTab === 'add-coding' && (
           <div className="card fade-in">
             <div className="card-header"><span className="card-title">💻 Add Coding Problem</span></div>
-            <form onSubmit={submitCoding}>
 
+            {/* 🤖 AI Generate Button */}
+            <div style={{ marginBottom: 16 }}>
+              <button type="button" className="btn btn-primary" disabled={loading}
+                onClick={async () => {
+                  setLoading(true);
+                  try {
+                    const res = await axios.post('/api/coding/generate-ai', {
+                      category: codeForm.category,
+                      difficulty: codeForm.difficulty,
+                      count: 10
+                    });
+                    toast.success(`✅ ${res.data.questions.length} coding questions generated!`);
+                    fetchStats();
+                  } catch (e) {
+                    toast.error('AI generation failed!');
+                  }
+                  setLoading(false);
+                }}>
+                {loading ? '⏳ Generating...' : '🤖 AI Generate 10 Questions'}
+              </button>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                Category & Difficulty select பண்ணி AI auto generate பண்ணலாம்!
+              </p>
+            </div>
+
+            <form onSubmit={submitCoding}>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16 }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label">Problem Title *</label>
@@ -318,13 +330,11 @@ export default function AdminPanel() {
                 </div>
               </div>
               <div style={{ height: 12 }} />
-
               <div className="input-group">
                 <label className="input-label">Problem Description *</label>
                 <textarea className="input" rows={5} placeholder="Describe the problem in detail..."
                   value={codeForm.description} onChange={e => setCodeForm({ ...codeForm, description: e.target.value })} required style={{ resize: 'vertical' }} />
               </div>
-
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12 }}>
                 <div className="input-group" style={{ marginBottom: 0 }}>
                   <label className="input-label">Difficulty *</label>
@@ -340,14 +350,11 @@ export default function AdminPanel() {
                 </div>
               </div>
               <div style={{ height: 12 }} />
-
               <div className="input-group">
                 <label className="input-label">Constraints</label>
                 <textarea className="input" rows={2} placeholder="1 <= n <= 10^5..." value={codeForm.constraints}
                   onChange={e => setCodeForm({ ...codeForm, constraints: e.target.value })} style={{ resize: 'vertical' }} />
               </div>
-
-              {/* Companies */}
               <div style={{ marginBottom: 16 }}>
                 <label className="input-label">Companies (Select all that apply)</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -360,8 +367,6 @@ export default function AdminPanel() {
                   ))}
                 </div>
               </div>
-
-              {/* Examples */}
               <div style={{ marginBottom: 16 }}>
                 <label className="input-label">Examples</label>
                 {codeForm.examples.map((ex, i) => (
@@ -379,8 +384,6 @@ export default function AdminPanel() {
                 ))}
                 <button type="button" className="btn btn-secondary btn-sm" onClick={addExample}>+ Add Example</button>
               </div>
-
-              {/* Hints */}
               <div style={{ marginBottom: 16 }}>
                 <label className="input-label">Hints (Optional)</label>
                 {codeForm.hints.map((h, i) => (
@@ -388,8 +391,6 @@ export default function AdminPanel() {
                 ))}
                 <button type="button" className="btn btn-secondary btn-sm" onClick={addHint}>+ Add Hint</button>
               </div>
-
-              {/* Starter Code */}
               <div style={{ marginBottom: 16 }}>
                 <label className="input-label">Starter Code (Optional)</label>
                 <div className="tabs" style={{ marginBottom: 12 }}>
@@ -403,7 +404,6 @@ export default function AdminPanel() {
                   value={codeForm.starterCode.javascript}
                   onChange={e => setCodeForm({ ...codeForm, starterCode: { ...codeForm.starterCode, javascript: e.target.value } })} />
               </div>
-
               <button type="submit" className="btn btn-primary btn-lg" disabled={loading}>
                 {loading ? '⏳ Adding...' : '➕ Add Problem'}
               </button>
@@ -426,16 +426,9 @@ export default function AdminPanel() {
                   <table>
                     <thead>
                       <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>College</th>
-                        <th>Dept/Year</th>
-                        <th>Points</th>
-                        <th>Solved</th>
-                        <th>Streak</th>
-                        <th>Role</th>
-                        <th>Action</th>
+                        <th>#</th><th>Name</th><th>Email</th><th>College</th>
+                        <th>Dept/Year</th><th>Points</th><th>Solved</th>
+                        <th>Streak</th><th>Role</th><th>Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -456,10 +449,10 @@ export default function AdminPanel() {
                           <td>{s.streak > 0 ? <span style={{ color: 'var(--accent-yellow)' }}>🔥 {s.streak}</span> : '—'}</td>
                           <td><span className={`chip ${s.role === 'admin' ? 'chip-hard' : 'chip-info'}`}>{s.role}</span></td>
                           <td>
-  {s.role !== 'admin' && (
-    <button className="btn btn-secondary btn-sm" onClick={() => deleteStudent(s._id, s.name)}>🗑️ Delete</button>
-  )}
-</td>
+                            {s.role !== 'admin' && (
+                              <button className="btn btn-secondary btn-sm" onClick={() => deleteStudent(s._id, s.name)}>🗑️ Delete</button>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
